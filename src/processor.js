@@ -108,7 +108,8 @@ class MeasureProcessor extends AudioWorkletProcessor {
                 this.remaining--;
             }
             this.record(mono_input[i] + mono_output[i]);
-            mono_output[i] += mono_input[i];
+            // Following line commented to avoid Larssen effect / feedback
+            //mono_output[i] += mono_input[i];
         }
         return true;
     }

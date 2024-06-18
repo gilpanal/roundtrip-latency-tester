@@ -7,11 +7,9 @@ function main() {
     }    
     $ = document.querySelectorAll.bind(document);
     $("button#start")[0].onclick = start;
-    $("button#stop")[0].onclick = stop;
+    $("button#stop")[0].onclick = stopFunc;
     $("button#stop")[0].disabled = true;
-    //const text = $('#processor')[0].innerText;
-    //const blob = new Blob([text], { type: "application/javascript" });
-    //const url = URL.createObjectURL(blob);
+
     var ac = new AudioContext();
     $("#sample-rate")[0].innerText = ac.sampleRate;
     var canvas = $("canvas")[0];
@@ -73,7 +71,7 @@ function main() {
         requestAnimationFrame(draw);
     }
 
-    function stop() {
+    function stopFunc() {
         ac.suspend();
         $("button#stop")[0].disabled = true;
         $("button#start")[0].disabled = false;
@@ -109,8 +107,26 @@ function main() {
                 var mic_source = ac.createMediaStreamSource(stream);
                 var worklet_node = new AudioWorkletNode(ac, 'measure-processor', { outputChannelCount: [1] });
                 worklet_node.channelCount = 1;
-                mic_source.connect(analyser);
-                mic_source.connect(worklet_node).connect(ac.destination);
+
+                // For Safari 16 and above when using echocancellation to false
+                // the input is dramatically reduced
+                if(true){
+                    const gainNode = ac.createGain()
+                    const defaultGain = 50
+                    gainNode.gain.value = defaultGain
+
+                    mic_source.connect(gainNode)
+                    
+                    const dest = ac.createMediaStreamDestination()
+             
+                    gainNode.connect(worklet_node)
+                    gainNode.connect(analyser)
+                    gainNode.connect(dest)
+                    worklet_node.connect(ac.destination);
+                } else {
+                    mic_source.connect(analyser); // original code
+                    mic_source.connect(worklet_node).connect(ac.destination); // original code
+                }              
 
                 worklet_node.port.postMessage({ threshold: $("input")[0].value });
 
