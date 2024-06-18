@@ -1,4 +1,8 @@
-import MeasureProcessor from 'worklet:./processor.js';
+import MeasureProcessor from 'worklet:./processor.js'
+const safariVersionIndex = navigator.userAgent.indexOf('Version/')
+const versionString =  navigator.userAgent.substring(safariVersionIndex + 8)
+const safariVersion = parseFloat(versionString)
+const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
 
 function main() {
     if (!window.AudioWorkletNode) {
@@ -110,26 +114,21 @@ function main() {
 
                 // For Safari 16 and above when using echocancellation to false
                 // the input is dramatically reduced
-                if(true){
-                    const gainNode = ac.createGain()
-                    const defaultGain = 50
-                    gainNode.gain.value = defaultGain
+                let defaultGain = 1
+                if(isSafari && safariVersion > 16){
+                    defaultGain = 50
+                }
+                const gainNode = ac.createGain()                
+                gainNode.gain.value = defaultGain
 
-                    mic_source.connect(gainNode)
-                    
-                    const dest = ac.createMediaStreamDestination()
-             
-                    gainNode.connect(worklet_node)
-                    gainNode.connect(analyser)
-                    gainNode.connect(dest)
-                    worklet_node.connect(ac.destination);
-                } else {
-                    mic_source.connect(analyser); // original code
-                    mic_source.connect(worklet_node).connect(ac.destination); // original code
-                }              
+                mic_source.connect(gainNode)
+            
+                gainNode.connect(worklet_node)
+                gainNode.connect(analyser)                
+
+                worklet_node.connect(ac.destination)                        
 
                 worklet_node.port.postMessage({ threshold: $("input")[0].value });
-
 
                 worklet_node.port.onmessage = function (e) {
                     if (debugCanvas) {
@@ -166,6 +165,7 @@ function main() {
                 initialSetup = true;
             }
         } catch (e) {
+            console.log(e)
         }
     }
 }
