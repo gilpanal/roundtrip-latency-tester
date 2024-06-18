@@ -1,0 +1,25 @@
+{
+  "name": "roundtrip-latency-tester",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "parcel --no-cache src/*.html --https",
+    "build": "parcel build 'src/*.html' ",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/padenot/roundtrip-latency-tester.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/padenot/roundtrip-latency-tester/issues"
+  },
+  "homepage": "https://github.com/padenot/roundtrip-latency-tester#readme",
+  "devDependencies": {
+    "@parcel/transformer-worklet": "^2.12.0",
+    "parcel": "^2.12.0"
+  }
+}
