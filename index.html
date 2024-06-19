@@ -246,8 +246,6 @@ function main() {
 
   threshold = $("input[type=range]")[0].value;
 
-  var worklet_node = null
-
   function draw() {
     ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
     ctx.fillRect(0, 0, w, h);
@@ -281,8 +279,7 @@ function main() {
   }
 
   function stop() {
-    //ac.suspend();
-    worklet_node.disconnect(ac.destination);
+    ac.suspend();
     $("button#stop")[0].disabled = true;
     $("button#start")[0].disabled = false;
     stop = true;
@@ -293,11 +290,10 @@ function main() {
     $("button#start")[0].disabled = true;
     stop = false;
     draw();
-    //await ac.resume();
+    await ac.resume();
     try {
-      //await ac.resume();
+      await ac.resume();
       if (!initialSetup) {
-        await ac.resume();
         await ac.audioWorklet.addModule(url);
         var constraints = inputProcessing ? { audio : {
           // disabling this because we're intentionally trying to echo 
@@ -312,7 +308,7 @@ function main() {
         let stream = await navigator.mediaDevices.getUserMedia(constraints);
 
         var mic_source = ac.createMediaStreamSource(stream);
-        worklet_node = new AudioWorkletNode(ac, 'measure-processor', {outputChannelCount: [1]});
+        var worklet_node = new AudioWorkletNode(ac, 'measure-processor', {outputChannelCount: [1]});
         worklet_node.channelCount = 1;
         mic_source.connect(analyser);
         mic_source.connect(worklet_node).connect(ac.destination);
@@ -353,8 +349,6 @@ function main() {
           worklet_node.port.postMessage({threshold: e.target.value});
         };
         initialSetup = true;
-      } else {
-        worklet_node.connect(ac.destination);
       }
     } catch (e) {
     }
