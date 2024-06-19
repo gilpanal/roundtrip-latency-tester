@@ -9,6 +9,8 @@ class MeasureProcessor extends AudioWorkletProcessor {
         this.start = 0;
         this.tapped = false;
 
+        this.threshold = 0.2;
+
         // Noise burst synthesis parameter
         this.sq_frames = 64;
         this.sq_remaining = 64;
@@ -18,10 +20,10 @@ class MeasureProcessor extends AudioWorkletProcessor {
         // the beginning of the noise burst a peak has been found.
         this.ringbuf = new Float32Array(globalThis.sampleRate);
         this.write_idx = 0;
-        var self = this;
-        this.port.onmessage = function (e) {
-            self.threshold = e.data.threshold;
-        }
+        //var self = this;
+        // this.port.onmessage = function (e) {
+        //     self.threshold = e.data.threshold;
+        // }
     }
     // record a single sample in the ring buffer
     record(sample) {
@@ -36,6 +38,7 @@ class MeasureProcessor extends AudioWorkletProcessor {
         return this.ringbuf[i];
     }
     process(inputs, outputs) {
+        //console.log(inputs[0][0].length); // this shows the bufferSize
         var input = inputs[0];
         if (!input.length) {
             return true;
